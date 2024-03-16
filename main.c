@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <time.h>
+#include <immintrin.h> 
 
 #include "generate_matrix.h"
 #include "mytimer.h"
@@ -28,7 +29,11 @@ int main(int argc, char *argv[])
 {
   /* Initalise values and matrix */
   struct mesh *A;
-  double *x, *b, *xexact;
+  double *xexact;
+  
+  double *x = (double *)_mm_malloc(sizeof(double), 32);
+  double *b = (double *)_mm_malloc(sizeof(double), 32);
+
   int ierr = 0;
   double times[4];
   int nx, ny, nz;

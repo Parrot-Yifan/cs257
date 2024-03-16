@@ -8,6 +8,8 @@
 #ifdef USING_SILO
 #include "silo_writer.h"
 #endif
+#include <immintrin.h> 
+
 
 /* Key definitions for calculating the time spend on a particular section */
 #define TICK() t0 = mytimer()
@@ -45,9 +47,9 @@ int conjugateGradient(struct mesh *A,
   int nrow = A->local_nrow;
   int ncol = A->local_ncol;
 
-  double *r = (double *) malloc(sizeof(double) * nrow);
-  double *p = (double *) malloc(sizeof(double) * ncol); // In parallel case, A is rectangular
-  double *Ap = (double *) malloc(sizeof(double) * nrow);
+double *r = (double *)_mm_malloc(sizeof(double) * nrow, 32);
+double *p = (double *)_mm_malloc(sizeof(double) * ncol, 32);
+double *Ap = (double *)_mm_malloc(sizeof(double) * nrow, 32);
 
   *normr = 0.0;
   double rtrans = 0.0;
@@ -136,9 +138,9 @@ int conjugateGradient(struct mesh *A,
   times[3] = t3; // sparsemv time
 
   /* Cleanup created arrays */
-  free(p);
-  free(Ap);
-  free(r);
+  _mm_free(r);
+  _mm_free(p);
+  _mm_free(Ap);
 
   /* Calculate total time spent */
   times[0] = mytimer() - t_begin;
