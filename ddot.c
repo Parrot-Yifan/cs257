@@ -1,4 +1,6 @@
 #include "ddot.h"
+#include <immintrin.h> 
+#include <omp.h>
 
 /**
  * @brief Compute the dot product of two vectors
@@ -10,16 +12,33 @@
  * @return int 0 if no error
  */
 int ddot (const int n, const double * const x, const double * const y, double * const result) {  
+
+  
   double local_result = 0.0;
-  if (y==x){
-    for (int i=0; i<n; i++) {
-      local_result += x[i]*x[i];
-    }
-  } else {
-    for (int i=0; i<n; i++) {
-      local_result += x[i]*y[i];
+
+  int loopFactor = 4;
+  int loopN = (n/loopFactor) * loopFactor;
+
+  #pragma omp parallel reduction(+:local_result)
+  {
+    #pragma omp for 
+    for (int i=0; i<loopN; i+=loopFactor) {
+
+      __m256d xVec = _mm256_loadu_pd(&x[i]);
+      __m256d yVec = _mm256_loadu_pd(&y[i]);
+      __m256d product = _mm256_mul_pd(xVec, yVec);
+      __m256d sumVec = _mm256_hadd_pd(product, product);
+      double localSums[4];
+
+      _mm256_storeu_pd(localSums, sumVec);
+      local_result += localSums[0] + localSums[2];
     }
   }
+
+    for(int i = loopN; i < n; i++){
+      local_result += x[i]*y[i];
+    }
+
   *result = local_result;
 
   return 0;
