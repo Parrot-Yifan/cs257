@@ -13,13 +13,12 @@
  */
 int ddot (const int n, const double * const x, const double * const y, double * const result) {  
 
-  
   double local_result = 0.0;
 
   int loopFactor = 4;
   int loopN = (n/loopFactor) * loopFactor;
 
-  #pragma omp parallel reduction(+:local_result)
+  #pragma omp parallel for reduction(+:local_result)
   for (int i=0; i<loopN; i+=loopFactor) {
 
     __m256d xVec = _mm256_load_pd(&x[i]);
