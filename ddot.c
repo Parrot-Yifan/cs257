@@ -20,26 +20,23 @@ int ddot (const int n, const double * const x, const double * const y, double * 
   int loopN = (n/loopFactor) * loopFactor;
 
   #pragma omp parallel reduction(+:local_result)
-  {
-    #pragma omp for 
-    for (int i=0; i<loopN; i+=loopFactor) {
+  for (int i=0; i<loopN; i+=loopFactor) {
 
-      __m256d xVec = _mm256_loadu_pd(&x[i]);
-      __m256d yVec = _mm256_loadu_pd(&y[i]);
-      __m256d product = _mm256_mul_pd(xVec, yVec);
-      __m256d sumVec = _mm256_hadd_pd(product, product);
-      double localSums[4];
+    __m256d xVec = _mm256_load_pd(&x[i]);
+    __m256d yVec = _mm256_load_pd(&y[i]);
+    __m256d product = _mm256_mul_pd(xVec, yVec);
+    __m256d sumVec = _mm256_hadd_pd(product, product);
+    double localSums[4];
 
-      _mm256_storeu_pd(localSums, sumVec);
-      local_result += localSums[0] + localSums[2];
-    }
+    _mm256_storeu_pd(localSums, sumVec);
+    local_result += localSums[0] + localSums[2];
   }
 
-    for(int i = loopN; i < n; i++){
-      local_result += x[i]*y[i];
-    }
+  for(int i = loopN; i < n; i++){
+    local_result += x[i]*y[i];
+}
 
-  *result = local_result;
+*result = local_result;
 
-  return 0;
+return 0;
 }
