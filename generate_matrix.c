@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "generate_matrix.h"
+#include <immintrin.h> 
 
 /**
  * @brief Generates the inital mesh and values
@@ -38,13 +39,13 @@ void generate_matrix(int nx, int ny, int nz, struct mesh **A, double **x, double
   (*A)->ptr_to_inds_in_row = (int **) malloc(sizeof(int *) * local_nrow);
   (*A)->ptr_to_diags = (double **) malloc(sizeof(double *) * local_nrow);
 
-  *x = (double *) malloc(sizeof(double) * local_nrow);
-  *b = (double *) malloc(sizeof(double) * local_nrow);
-  *xexact = (double *) malloc(sizeof(double) * local_nrow);
+  *x = (double *) _mm_malloc(sizeof(double) * local_nrow, 32);
+  *b = (double *) _mm_malloc(sizeof(double) * local_nrow, 32);
+  *xexact = (double *) _mm_malloc(sizeof(double) * local_nrow, 32);
 
   // Allocate arrays that are of length local_nnz
-  (*A)->list_of_vals = (double *) malloc(sizeof(double) * local_nnz);
-  (*A)->list_of_inds = (int *) malloc(sizeof(int) * local_nnz);
+  (*A)->list_of_vals = (double *) _mm_malloc(sizeof(double) * local_nnz, 32);
+  (*A)->list_of_inds = (int *) _mm_malloc(sizeof(int) * local_nnz, 32);
 
   double *curvalptr = (*A)->list_of_vals;
   int *curindptr = (*A)->list_of_inds;

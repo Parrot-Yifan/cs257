@@ -29,15 +29,17 @@ int main(int argc, char *argv[])
 {
   /* Initalise values and matrix */
   struct mesh *A;
-  double *xexact;
-  
-  double *x = (double *)_mm_malloc(sizeof(double), 32);
-  double *b = (double *)_mm_malloc(sizeof(double), 32);
+
+  double *xexact = (double *)_mm_malloc(atoi(argv[1]) * atoi(argv[2]) * atoi(argv[3]) * sizeof(double), 32);
+  double *x = (double *)_mm_malloc(atoi(argv[1]) * atoi(argv[2]) * atoi(argv[3]) * sizeof(double), 32);
+  double *b = (double *)_mm_malloc(atoi(argv[1]) * atoi(argv[2]) * atoi(argv[3]) * sizeof(double), 32);  
 
   int ierr = 0;
   double times[4];
   int nx, ny, nz;
   int stencil_bool = 0;
+
+
 
   /* Create file and dir (and if using Silo, the Silo) name */
   time_t rawtime;
@@ -57,6 +59,7 @@ int main(int argc, char *argv[])
     if (argc > 4 && atoi(argv[4]) == 1) {
       stencil_bool = 1;
     }
+
     generate_matrix(nx, ny, nz, &A, &x, &b, &xexact, stencil_bool);
   }
 
@@ -143,6 +146,10 @@ int main(int argc, char *argv[])
     fclose(fptr);
   }
   free(fileOutputName);
+
+  _mm_free(x);
+  _mm_free(b);
+  _mm_free(xexact);
 
   /* Thats all folks...! */
   return 0;
