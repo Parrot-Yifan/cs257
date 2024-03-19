@@ -26,25 +26,26 @@ int waxpby (const int n, const double alpha, const double * const x, const doubl
   __m256d alphaVec = _mm256_set1_pd(alpha);
 
   if (alpha==1.0) {
+
     #pragma omp parallel for private(xVec, yVec, wVec)
     for (int i=0; i<loopN; i+=loopFactor) {
 
-      xVec = _mm256_loadu_pd(&x[i]);
-      yVec = _mm256_loadu_pd(&y[i]);
+      xVec = _mm256_load_pd(&x[i]);
+      yVec = _mm256_load_pd(&y[i]);
       wVec = _mm256_add_pd(xVec, _mm256_mul_pd(yVec, betaVec));
-      _mm256_storeu_pd(&w[i], wVec);
+      _mm256_store_pd(&w[i], wVec);
 
     }
     
     //Handling residual elements
-    #pragma omp parallel for
     for (int i = loopN; i<n; i++){
       w[i] = x[i] + beta * y[i];
     }
 
     
-
   } else if(beta==1.0) {
+
+    #pragma omp parallel for private(xVec, yVec, wVec)
     for (int i=0; i<loopN; i+=loopFactor) {
 
       xVec = _mm256_load_pd(&x[i]);
@@ -60,6 +61,8 @@ int waxpby (const int n, const double alpha, const double * const x, const doubl
     }
 
   } else {
+
+    #pragma omp parallel for private(xVec, yVec, wVec)
     for (int i=0; i<loopN; i+=loopFactor) {
       
       xVec = _mm256_load_pd(&x[i]);
@@ -68,10 +71,9 @@ int waxpby (const int n, const double alpha, const double * const x, const doubl
       _mm256_store_pd(&w[i], wVec);
 
     }
+    
      for (int i = loopN ; i<n; i++) {
-
       w[i] = alpha * x[i] + beta * y[i];
-
      }
   }
 

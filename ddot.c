@@ -1,3 +1,4 @@
+
 #include "ddot.h"
 #include <immintrin.h> 
 #include <omp.h>
@@ -27,6 +28,7 @@ int ddot (const int n, const double * const x, const double * const y, double * 
     __m256d sumVec = _mm256_hadd_pd(product, product);
     double localSums[4];
 
+    //没有用对齐，对齐后更费时间
     _mm256_storeu_pd(localSums, sumVec);
     local_result += localSums[0] + localSums[2];
   }
